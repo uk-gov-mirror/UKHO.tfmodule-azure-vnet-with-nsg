@@ -5,7 +5,12 @@ resource "azurerm_subnet" "spokesubnet" {
   resource_group_name  = var.resource_group.name
   virtual_network_name = azurerm_virtual_network.spokevnet.name
   address_prefixes     = [cidrsubnet(local.base_cidr_block,coalesce(each.value.newbits, var.newbits),each.value.number)]
-  service_endpoints    = var.service_endpoints
+  dynamic "service_endpoint" {
+    for_each = var.service_endpoints
+    content {
+      service = service_endpoint.value
+    }
+  }
 
   dynamic "delegation" {
     for_each = each.value.delegation_name != null ? [1] : []
